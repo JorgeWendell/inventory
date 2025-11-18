@@ -5,9 +5,7 @@ import { materiaisCategorias } from "@/constants/materiais-de-ti";
 export const upsertMaterialTiSchema = z.object({
   id: z.string().uuid().optional(),
   nome: z.string().min(1, { message: "Nome é obrigatório" }),
-  categoria: z.enum(materiaisCategorias, {
-    errorMap: () => ({ message: "Categoria inválida" }),
-  }),
+  categoria: z.enum(materiaisCategorias),
   estoqueMin: z.coerce
     .number()
     .int()

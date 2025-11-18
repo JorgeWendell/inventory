@@ -43,7 +43,7 @@ const formSchema = z
   .object({
     tipoProduto: z.enum(["MATERIAL_TI", "TONER"]),
     produtoId: z.string().min(1, { message: "Produto é obrigatório" }),
-    quantidade: z.coerce
+    quantidade: z
       .number()
       .int()
       .min(1, { message: "Quantidade deve ser maior que zero" }),
@@ -209,7 +209,10 @@ const CreatePedidoInternoForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Produto</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? undefined}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o material" />
@@ -235,7 +238,10 @@ const CreatePedidoInternoForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Produto</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? undefined}
+                  >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o toner" />
@@ -259,7 +265,10 @@ const CreatePedidoInternoForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Impressora</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? undefined}
+                  >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a impressora" />
@@ -316,7 +325,13 @@ const CreatePedidoInternoForm = ({
               <FormItem>
                 <FormLabel>Quantidade</FormLabel>
                 <FormControl>
-                  <Input type="number" min={1} {...field} />
+                  <Input
+                    type="number"
+                    min={1}
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    value={field.value}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

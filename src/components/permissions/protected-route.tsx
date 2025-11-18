@@ -22,7 +22,7 @@ export function ProtectedRoute({
   const userRole = (session.data?.user as any)?.role as UserRole | undefined;
 
   useEffect(() => {
-    if (session.status === "loading") return;
+    if (session.isPending) return;
 
     if (!session.data?.user) {
       router.push("/authentication");
@@ -34,7 +34,7 @@ export function ProtectedRoute({
     }
   }, [session, userRole, route, router]);
 
-  if (session.status === "loading") {
+  if (session.isPending) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p className="text-muted-foreground">Carregando...</p>

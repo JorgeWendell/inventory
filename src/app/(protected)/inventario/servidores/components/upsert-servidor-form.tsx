@@ -36,7 +36,7 @@ const formSchema = z.object({
   disco3: z.string().optional(),
   disco4: z.string().optional(),
   disco5: z.string().optional(),
-  vm: z.boolean().default(false),
+  vm: z.boolean(),
   funcao: z.string().optional(),
 });
 

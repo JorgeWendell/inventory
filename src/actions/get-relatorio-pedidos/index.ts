@@ -22,7 +22,8 @@ export async function getRelatorioPedidos(
   }
 
   if (status) {
-    conditions.push(eq(pedidoInternoTable.status, status));
+    const validStatus = status as "AGUARDANDO" | "ENVIADO" | "RECEBIDO";
+    conditions.push(eq(pedidoInternoTable.status, validStatus));
   }
 
   const pedidos = await db
@@ -57,9 +58,9 @@ export async function getRelatorioPedidos(
     cor: ped.cor || "N/A",
     status: ped.status,
     enviadoPor: ped.enviadoPor || "N/A",
-    dataEnvio: ped.dataEnvio?.toISOString().split("T")[0] || "N/A",
+    dataEnvio: ped.dataEnvio || "N/A",
     recebidoPor: ped.recebidoPor || "N/A",
-    dataRecebimento: ped.dataRecebimento?.toISOString().split("T")[0] || "N/A",
+    dataRecebimento: ped.dataRecebimento || "N/A",
     data: ped.createdAt.toISOString().split("T")[0],
     solicitante: ped.solicitanteNome || "N/A",
   }));

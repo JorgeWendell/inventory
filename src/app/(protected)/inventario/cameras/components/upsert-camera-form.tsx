@@ -42,10 +42,10 @@ import { camerasTable } from "@/db/schema";
 const formSchema = z.object({
   nome: z.string().min(1, { message: "Nome é obrigatório" }),
   localidade: z.string().optional(),
-  quantidadeCameras: z.number().int().min(1).default(1),
+  quantidadeCameras: z.number().int().min(1),
   intelbrasId: z.string().optional(),
   nobreakId: z.string().optional(),
-  usuariosNome: z.array(z.string()).default([]),
+  usuariosNome: z.array(z.string()),
 });
 
 interface UpsertCameraFormProps {

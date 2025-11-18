@@ -22,7 +22,7 @@ export const auth = betterAuth({
   },
   session: {
     modelName: "sessionsTable",
-    async onRead({ session, user }) {
+    async onRead({ session, user }: { session: any; user: any }) {
       // Buscar o role do usuário do banco de dados
       const userData = await db
         .select({ role: usersTable.role })

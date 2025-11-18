@@ -28,7 +28,12 @@ export async function getRelatorioSolicitacoes(
   }
 
   if (status) {
-    conditions.push(eq(solicitacaoCompraTable.status, status));
+    const validStatus = status as
+      | "EM_ANDAMENTO"
+      | "AGUARDANDO_ENTREGA"
+      | "COMPRADO"
+      | "CONCLUIDO";
+    conditions.push(eq(solicitacaoCompraTable.status, validStatus));
   }
 
   const solicitacoes = await db
@@ -39,7 +44,8 @@ export async function getRelatorioSolicitacoes(
       tonerId: solicitacaoCompraTable.tonerId,
       quantidade: solicitacaoCompraTable.quantidade,
       status: solicitacaoCompraTable.status,
-      fornecedorSelecionado: solicitacaoCompraTable.fornecedorSelecionado,
+      cotacaoSelecionadaId: solicitacaoCompraTable.cotacaoSelecionadaId,
+      fornecedorSelecionadoNome: solicitacaoCompraCotacaoTable.fornecedorNome,
       recebidoPor: solicitacaoCompraTable.recebidoPor,
       dataRecebimento: solicitacaoCompraTable.dataRecebimento,
       numeroNotaFiscal: solicitacaoCompraTable.numeroNotaFiscal,
@@ -47,6 +53,13 @@ export async function getRelatorioSolicitacoes(
       userName: usersTable.name,
     })
     .from(solicitacaoCompraTable)
+    .leftJoin(
+      solicitacaoCompraCotacaoTable,
+      eq(
+        solicitacaoCompraCotacaoTable.id,
+        solicitacaoCompraTable.cotacaoSelecionadaId,
+      ),
+    )
     .leftJoin(usersTable, eq(solicitacaoCompraTable.updateUserId, usersTable.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(solicitacaoCompraTable.createdAt))
@@ -91,7 +104,7 @@ export async function getRelatorioSolicitacoes(
       const cotacoes = await db
         .select()
         .from(solicitacaoCompraCotacaoTable)
-        .where(eq(solicitacaoCompraCotacaoTable.solicitacaoId, sol.id));
+        .where(eq(solicitacaoCompraCotacaoTable.solicitacaoCompraId, sol.id));
 
       return {
         tipoProduto: sol.tipoProduto,
@@ -99,15 +112,15 @@ export async function getRelatorioSolicitacoes(
         categoria,
         quantidade: sol.quantidade,
         status: sol.status,
-        fornecedorSelecionado: sol.fornecedorSelecionado || "N/A",
+        fornecedorSelecionado: sol.fornecedorSelecionadoNome || "N/A",
         recebidoPor: sol.recebidoPor || "N/A",
         dataRecebimento: sol.dataRecebimento?.toISOString().split("T")[0] || "N/A",
         numeroNotaFiscal: sol.numeroNotaFiscal || "N/A",
         data: sol.createdAt.toISOString().split("T")[0],
         atualizadoPor: sol.userName || "N/A",
         cotacoes: cotacoes.map((cot) => ({
-          nomeFornecedor: cot.nomeFornecedor,
-          cnpj: cot.cnpj,
+          nomeFornecedor: cot.fornecedorNome,
+          cnpj: cot.fornecedorCnpj || "N/A",
           valor: cot.valor,
           quantidade: cot.quantidade,
           prazoEntrega: cot.prazoEntrega?.toISOString().split("T")[0] || "N/A",

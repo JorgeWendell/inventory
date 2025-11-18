@@ -43,8 +43,8 @@ const formSchema = z.object({
   cor: coresEnum.optional(),
   localidadeNome: z.string().optional(),
   impressoraNome: z.string().optional(),
-  estoqueMin: z.number().int().min(0).default(0),
-  estoqueAtual: z.number().int().min(0).default(0),
+  estoqueMin: z.number().int().min(0),
+  estoqueAtual: z.number().int().min(0),
 });
 
 interface UpsertTonerFormProps {

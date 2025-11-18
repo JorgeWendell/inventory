@@ -1,6 +1,6 @@
 import { UserRole } from "@/constants/user-roles";
 
-type Permission =
+export type Permission =
   | "dashboard.view"
   | "dashboard.actions"
   | "estoque.view"

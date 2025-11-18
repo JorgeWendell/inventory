@@ -38,14 +38,12 @@ import { materiaisCategorias } from "@/constants/materiais-de-ti";
 
 const formSchema = z.object({
   nome: z.string().min(1, { message: "Nome é obrigatório" }),
-  categoria: z.enum(materiaisCategorias, {
-    errorMap: () => ({ message: "Selecione uma categoria" }),
-  }),
-  estoqueMin: z.coerce
+  categoria: z.enum(materiaisCategorias),
+  estoqueMin: z
     .number()
     .int()
     .min(0, { message: "Estoque mínimo deve ser maior ou igual a zero" }),
-  estoqueAtual: z.coerce
+  estoqueAtual: z
     .number()
     .int()
     .min(0, { message: "Estoque atual deve ser maior ou igual a zero" }),
@@ -203,7 +201,13 @@ const UpsertMaterialForm = ({
                 <FormItem>
                   <FormLabel>Estoque mínimo</FormLabel>
                   <FormControl>
-                    <Input type="number" min={0} {...field} />
+                    <Input
+                      type="number"
+                      min={0}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={field.value}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -216,7 +220,13 @@ const UpsertMaterialForm = ({
                 <FormItem>
                   <FormLabel>Estoque atual</FormLabel>
                   <FormControl>
-                    <Input type="number" min={0} {...field} />
+                    <Input
+                      type="number"
+                      min={0}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={field.value}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

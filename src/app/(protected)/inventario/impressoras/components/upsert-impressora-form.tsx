@@ -44,15 +44,13 @@ const formSchema = z.object({
   marca: z.string().optional(),
   modelo: z.string().optional(),
   localidadeNome: z.string().optional(),
-  manutencao: z.boolean().default(false),
-  toners: z
-    .array(
-      z.object({
-        tonerNome: z.string(),
-        quantidade: z.number().int().min(1).default(1),
-      }),
-    )
-    .default([]),
+  manutencao: z.boolean(),
+  toners: z.array(
+    z.object({
+      tonerNome: z.string(),
+      quantidade: z.number().int().min(1),
+    }),
+  ),
 });
 
 interface UpsertImpressoraFormProps {

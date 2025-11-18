@@ -82,11 +82,12 @@ const cotacoesFormSchema = z.object({
   fornecedorCnpj: z.string().optional().nullable(),
   produtoDescricao: z.string().min(1, { message: "Produto é obrigatório" }),
   valor: z.number().min(0.01, { message: "Informe o valor" }),
-  quantidade: z.coerce
+  quantidade: z
     .number()
     .int()
     .min(1, { message: "Quantidade deve ser maior que zero" }),
   prazoEntrega: z.string().optional().nullable(),
+  observacoes: z.string().optional().nullable(),
 });
 
 const conclusaoFormSchema = z.object({
@@ -191,6 +192,7 @@ const SolicitacoesTableActions = ({
       valor: 0,
       quantidade: solicitacao.quantidade,
       prazoEntrega: "",
+      observacoes: "",
     },
   });
 
@@ -437,7 +439,11 @@ const SolicitacoesTableActions = ({
                     <FormItem>
                       <FormLabel>CNPJ</FormLabel>
                       <FormControl>
-                        <Input placeholder="00.000.000/0000-00" {...field} />
+                        <Input
+                          placeholder="00.000.000/0000-00"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -496,7 +502,13 @@ const SolicitacoesTableActions = ({
                     <FormItem>
                       <FormLabel>Quantidade</FormLabel>
                       <FormControl>
-                        <Input type="number" min={1} {...field} />
+                        <Input
+                          type="number"
+                          min={1}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          value={field.value}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -509,7 +521,11 @@ const SolicitacoesTableActions = ({
                     <FormItem>
                       <FormLabel>Prazo de entrega</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input
+                          type="date"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -527,6 +543,7 @@ const SolicitacoesTableActions = ({
                         rows={3}
                         placeholder="Informações adicionais para esta cotação"
                         {...field}
+                        value={field.value ?? ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -676,7 +693,11 @@ const SolicitacoesTableActions = ({
                   <FormItem>
                     <FormLabel>Nº Nota Fiscal (opcional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Digite o número da nota" {...field} />
+                      <Input
+                        placeholder="Digite o número da nota"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

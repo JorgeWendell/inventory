@@ -28,10 +28,13 @@ const SetAdminPage = () => {
       );
     },
     onError: (error) => {
+      const emailError = error.error?.validationErrors?.email;
       const message =
         error.error?.serverError ||
-        error.error?.validationErrors?.email?.[0] ||
-        error.error?.message ||
+        (emailError && "_errors" in emailError
+          ? emailError._errors?.[0]
+          : undefined) ||
+        error.error?.thrownError?.message ||
         "Erro ao definir administrador";
       toast.error(message);
     },
@@ -41,10 +44,10 @@ const SetAdminPage = () => {
     <PageContainer>
       <PageHeader>
         <PageHeaderContent>
-          <PageTitle className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Shield className="h-6 w-6" />
-            Definir Primeiro Administrador
-          </PageTitle>
+            <PageTitle>Definir Primeiro Administrador</PageTitle>
+          </div>
           <PageDescription>
             Use esta página apenas uma vez para definir o primeiro administrador do sistema.
             Após isso, você pode remover esta página.
