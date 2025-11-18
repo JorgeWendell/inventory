@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  numeric,
   pgEnum,
   pgTable,
   text,
@@ -52,9 +53,47 @@ export const accountsTable = pgTable("accounts", {
 export const departamentosEnum = pgEnum("departamentos", [
   "Administracao",
   "Compras",
-  "DepPessoal",
+  "Contabil-Fiscal",
+  "Dep.Pessoal",
+  "Digitação",
+  "Financeiro",
+  "HD Externo",
+  "Juridico",
+  "Lista Operacional",
+  "Notas Fiscais",
+  "Operacional",
+  "Porto Marina Resort",
   "TI",
   "Publico",
+]);
+
+export const coresEnum = pgEnum("cores", [
+  "Preta",
+  "Amarela",
+  "Magenta",
+  "Azul",
+]);
+
+export const materiaisCategoriaEnum = pgEnum("materiais_categoria", [
+  "Mouse",
+  "Teclado",
+  "Monitor",
+  "Computador",
+  "Nobreak",
+  "Camera",
+]);
+
+export const solicitacaoCompraStatusEnum = pgEnum("solicitacao_compra_status", [
+  "EM_ANDAMENTO",
+  "AGUARDANDO_ENTREGA",
+  "COMPRADO",
+  "CONCLUIDO",
+]);
+
+export const pedidoInternoStatusEnum = pgEnum("pedido_interno_status", [
+  "AGUARDANDO",
+  "ENVIADO",
+  "RECEBIDO",
 ]);
 
 export const localidadeTable = pgTable("localidade", {
@@ -88,9 +127,11 @@ export const computadoresTable = pgTable("computadores", {
   processador: text("processador"),
   memoria: text("memoria"),
   disco: text("disco"),
+  garantia: timestamp("garantia"),
   localidadeNome: text("localidade_nome").references(
     () => localidadeTable.nome,
   ),
+  usuarioNome: text("usuario_nome").references(() => usuarioTable.nome),
   updateUserId: text("update_user_id").references(() => usersTable.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -100,6 +141,10 @@ export const monitorTable = pgTable("monitor", {
   id: text("id").primaryKey(),
   marca: text("marca"),
   modelo: text("modelo"),
+  localidadeNome: text("localidade_nome").references(
+    () => localidadeTable.nome,
+  ),
+  usuarioNome: text("usuario_nome").references(() => usuarioTable.nome),
   updateUserId: text("update_user_id").references(() => usersTable.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -108,6 +153,7 @@ export const monitorTable = pgTable("monitor", {
 export const tonerTable = pgTable("toner", {
   id: text("id").primaryKey(),
   nome: text("nome").notNull().unique(),
+  cor: coresEnum("cor"),
   localidadeNome: text("localidade_nome").references(
     () => localidadeTable.nome,
   ),
@@ -116,6 +162,7 @@ export const tonerTable = pgTable("toner", {
   ),
   estoqueMin: integer("estoque_min").default(0),
   estoqueAtual: integer("estoque_atual").default(0),
+  updateUserId: text("update_user_id").references(() => usersTable.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -132,6 +179,18 @@ export const impressoraTable = pgTable("impressora", {
   updateUserId: text("update_user_id").references(() => usersTable.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const impressorasTonersTable = pgTable("impressoras_toners", {
+  id: text("id").primaryKey(),
+  impressoraId: text("impressora_id")
+    .notNull()
+    .references(() => impressoraTable.id, { onDelete: "cascade" }),
+  tonerNome: text("toner_nome")
+    .notNull()
+    .references(() => tonerTable.nome, { onDelete: "cascade" }),
+  quantidade: integer("quantidade").default(1),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const nobreakTable = pgTable("nobreak", {
@@ -158,10 +217,20 @@ export const camerasTable = pgTable("cameras", {
   quantidadeCameras: integer("quantidade_cameras").default(1),
   intelbrasId: text("intelbras_id"),
   nobreakId: text("nobreak_id").references(() => nobreakTable.id),
-  acesso: text("acesso"),
   updateUserId: text("update_user_id").references(() => usersTable.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const camerasUsuariosTable = pgTable("cameras_usuarios", {
+  id: text("id").primaryKey(),
+  cameraId: text("camera_id")
+    .notNull()
+    .references(() => camerasTable.id, { onDelete: "cascade" }),
+  usuarioNome: text("usuario_nome")
+    .notNull()
+    .references(() => usuarioTable.nome, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const officeTable = pgTable("office", {
@@ -171,6 +240,23 @@ export const officeTable = pgTable("office", {
   computadorNome: text("computador_nome")
     .notNull()
     .references(() => computadoresTable.nome),
+  usuarioNome: text("usuario_nome").references(() => usuarioTable.nome),
+  updateUserId: text("update_user_id").references(() => usersTable.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const servidorTable = pgTable("servidor", {
+  id: text("id").primaryKey(),
+  nome: text("nome").notNull().unique(),
+  memoria: text("memoria"),
+  disco1: text("disco1"),
+  disco2: text("disco2"),
+  disco3: text("disco3"),
+  disco4: text("disco4"),
+  disco5: text("disco5"),
+  vm: boolean("vm").default(false),
+  funcao: text("funcao"),
   updateUserId: text("update_user_id").references(() => usersTable.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -185,7 +271,104 @@ export const acessosDepartamentosTable = pgTable("acessos_departamentos", {
     .notNull()
     .references(() => computadoresTable.nome),
   pastaDepartamentos: departamentosEnum("pasta_departamentos").notNull(),
-  acesso: boolean("acesso").default(true),
+  updateUserId: text("update_user_id").references(() => usersTable.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const acessosDepartamentosUsuariosTable = pgTable(
+  "acessos_departamentos_usuarios",
+  {
+    id: text("id").primaryKey(),
+    acessoDepartamentoId: text("acesso_departamento_id")
+      .notNull()
+      .references(() => acessosDepartamentosTable.id, { onDelete: "cascade" }),
+    usuarioNome: text("usuario_nome")
+      .notNull()
+      .references(() => usuarioTable.nome, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+);
+
+export const materiaisDeTiTable = pgTable("materiais_de_ti", {
+  id: text("id").primaryKey(),
+  nome: text("nome").notNull(),
+  categoria: materiaisCategoriaEnum("categoria").notNull(),
+  quantidade: integer("quantidade").default(0),
+  estoqueMin: integer("estoque_min").default(0),
+  estoqueAtual: integer("estoque_atual").default(0),
+  localidadeNome: text("localidade_nome").references(
+    () => localidadeTable.nome,
+  ),
+  updateUserId: text("update_user_id").references(() => usersTable.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const solicitacaoCompraTable = pgTable("solicitacao_compra", {
+  id: text("id").primaryKey(),
+  tipoProduto: text("tipo_produto").notNull().default("MATERIAL_TI"), // "MATERIAL_TI" ou "TONER"
+  materialId: text("material_id").references(() => materiaisDeTiTable.id, {
+    onDelete: "cascade",
+  }),
+  tonerId: text("toner_id").references(() => tonerTable.id, {
+    onDelete: "cascade",
+  }),
+  cor: coresEnum("cor"), // Para toner
+  quantidade: integer("quantidade").notNull().default(1),
+  status: solicitacaoCompraStatusEnum("status")
+    .notNull()
+    .default("EM_ANDAMENTO"),
+  cotacoesNotas: text("cotacoes_notas"),
+  cotacaoSelecionadaId: text("cotacao_selecionada_id"),
+  recebidoPor: text("recebido_por"),
+  dataRecebimento: timestamp("data_recebimento"),
+  numeroNotaFiscal: text("numero_nota_fiscal"),
+  updateUserId: text("update_user_id").references(() => usersTable.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const solicitacaoCompraCotacaoTable = pgTable(
+  "solicitacao_compra_cotacao",
+  {
+    id: text("id").primaryKey(),
+    solicitacaoCompraId: text("solicitacao_compra_id")
+      .notNull()
+      .references(() => solicitacaoCompraTable.id, { onDelete: "cascade" }),
+    fornecedorNome: text("fornecedor_nome").notNull(),
+    fornecedorCnpj: text("fornecedor_cnpj"),
+    produtoDescricao: text("produto_descricao").notNull(),
+    valor: numeric("valor", { precision: 12, scale: 2 }).notNull(),
+    quantidade: integer("quantidade").notNull().default(1),
+    prazoEntrega: timestamp("prazo_entrega"),
+    updateUserId: text("update_user_id").references(() => usersTable.id),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+);
+
+export const pedidoInternoTable = pgTable("pedido_interno", {
+  id: text("id").primaryKey(),
+  tipoProduto: text("tipo_produto").notNull(), // "MATERIAL_TI" ou "TONER"
+  produtoId: text("produto_id").notNull(), // FK para materiaisDeTiTable.id ou tonerTable.id
+  categoria: text("categoria"), // Snapshot da categoria
+  quantidade: integer("quantidade").notNull().default(1),
+  localidadeNome: text("localidade_nome").references(
+    () => localidadeTable.nome,
+  ),
+  impressoraNome: text("impressora_nome").references(
+    () => impressoraTable.nome,
+  ),
+  cor: coresEnum("cor"),
+  status: pedidoInternoStatusEnum("status").notNull().default("AGUARDANDO"),
+  enviadoPor: text("enviado_por"),
+  dataEnvio: text("data_envio"),
+  recebidoPor: text("recebido_por"),
+  dataRecebimento: text("data_recebimento"),
+  solicitanteId: text("solicitante_id")
+    .notNull()
+    .references(() => usersTable.id),
   updateUserId: text("update_user_id").references(() => usersTable.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -198,6 +381,7 @@ export const localidadeRelations = relations(localidadeTable, ({ many }) => ({
   toners: many(tonerTable),
   nobreaks: many(nobreakTable),
   cameras: many(camerasTable),
+  materiaisDeTi: many(materiaisDeTiTable),
 }));
 
 export const usuarioRelations = relations(usuarioTable, ({ one, many }) => ({
@@ -205,8 +389,13 @@ export const usuarioRelations = relations(usuarioTable, ({ one, many }) => ({
     fields: [usuarioTable.localidadeNome],
     references: [localidadeTable.nome],
   }),
+  computadores: many(computadoresTable),
+  monitores: many(monitorTable),
   nobreaks: many(nobreakTable),
+  office: many(officeTable),
+  cameras: many(camerasUsuariosTable),
   acessosDepartamentos: many(acessosDepartamentosTable),
+  acessosDepartamentosUsuarios: many(acessosDepartamentosUsuariosTable),
 }));
 
 export const computadoresRelations = relations(
@@ -216,13 +405,26 @@ export const computadoresRelations = relations(
       fields: [computadoresTable.localidadeNome],
       references: [localidadeTable.nome],
     }),
+    usuario: one(usuarioTable, {
+      fields: [computadoresTable.usuarioNome],
+      references: [usuarioTable.nome],
+    }),
     office: many(officeTable),
     nobreaks: many(nobreakTable),
     acessosDepartamentos: many(acessosDepartamentosTable),
   }),
 );
 
-export const monitorRelations = relations(monitorTable, () => ({}));
+export const monitorRelations = relations(monitorTable, ({ one }) => ({
+  localidade: one(localidadeTable, {
+    fields: [monitorTable.localidadeNome],
+    references: [localidadeTable.nome],
+  }),
+  usuario: one(usuarioTable, {
+    fields: [monitorTable.usuarioNome],
+    references: [usuarioTable.nome],
+  }),
+}));
 
 export const impressoraRelations = relations(
   impressoraTable,
@@ -231,11 +433,11 @@ export const impressoraRelations = relations(
       fields: [impressoraTable.localidadeNome],
       references: [localidadeTable.nome],
     }),
-    toners: many(tonerTable),
+    toners: many(impressorasTonersTable),
   }),
 );
 
-export const tonerRelations = relations(tonerTable, ({ one }) => ({
+export const tonerRelations = relations(tonerTable, ({ one, many }) => ({
   localidade: one(localidadeTable, {
     fields: [tonerTable.localidadeNome],
     references: [localidadeTable.nome],
@@ -244,7 +446,22 @@ export const tonerRelations = relations(tonerTable, ({ one }) => ({
     fields: [tonerTable.impressoraNome],
     references: [impressoraTable.nome],
   }),
+  impressoras: many(impressorasTonersTable),
 }));
+
+export const impressorasTonersRelations = relations(
+  impressorasTonersTable,
+  ({ one }) => ({
+    impressora: one(impressoraTable, {
+      fields: [impressorasTonersTable.impressoraId],
+      references: [impressoraTable.id],
+    }),
+    toner: one(tonerTable, {
+      fields: [impressorasTonersTable.tonerNome],
+      references: [tonerTable.nome],
+    }),
+  }),
+);
 
 export const nobreakRelations = relations(nobreakTable, ({ one, many }) => ({
   localidade: one(localidadeTable, {
@@ -262,7 +479,7 @@ export const nobreakRelations = relations(nobreakTable, ({ one, many }) => ({
   cameras: many(camerasTable),
 }));
 
-export const camerasRelations = relations(camerasTable, ({ one }) => ({
+export const camerasRelations = relations(camerasTable, ({ one, many }) => ({
   localidade: one(localidadeTable, {
     fields: [camerasTable.localidade],
     references: [localidadeTable.nome],
@@ -271,18 +488,37 @@ export const camerasRelations = relations(camerasTable, ({ one }) => ({
     fields: [camerasTable.nobreakId],
     references: [nobreakTable.id],
   }),
+  usuarios: many(camerasUsuariosTable),
 }));
+
+export const camerasUsuariosRelations = relations(
+  camerasUsuariosTable,
+  ({ one }) => ({
+    camera: one(camerasTable, {
+      fields: [camerasUsuariosTable.cameraId],
+      references: [camerasTable.id],
+    }),
+    usuario: one(usuarioTable, {
+      fields: [camerasUsuariosTable.usuarioNome],
+      references: [usuarioTable.nome],
+    }),
+  }),
+);
 
 export const officeRelations = relations(officeTable, ({ one }) => ({
   computador: one(computadoresTable, {
     fields: [officeTable.computadorNome],
     references: [computadoresTable.nome],
   }),
+  usuario: one(usuarioTable, {
+    fields: [officeTable.usuarioNome],
+    references: [usuarioTable.nome],
+  }),
 }));
 
 export const acessosDepartamentosRelations = relations(
   acessosDepartamentosTable,
-  ({ one }) => ({
+  ({ one, many }) => ({
     usuario: one(usuarioTable, {
       fields: [acessosDepartamentosTable.usuarioLogin],
       references: [usuarioTable.login],
@@ -290,6 +526,126 @@ export const acessosDepartamentosRelations = relations(
     computador: one(computadoresTable, {
       fields: [acessosDepartamentosTable.computadorNome],
       references: [computadoresTable.nome],
+    }),
+    usuarios: many(acessosDepartamentosUsuariosTable),
+  }),
+);
+
+export const acessosDepartamentosUsuariosRelations = relations(
+  acessosDepartamentosUsuariosTable,
+  ({ one }) => ({
+    acessoDepartamento: one(acessosDepartamentosTable, {
+      fields: [acessosDepartamentosUsuariosTable.acessoDepartamentoId],
+      references: [acessosDepartamentosTable.id],
+    }),
+    usuario: one(usuarioTable, {
+      fields: [acessosDepartamentosUsuariosTable.usuarioNome],
+      references: [usuarioTable.nome],
+    }),
+  }),
+);
+
+export const materiaisDeTiRelations = relations(
+  materiaisDeTiTable,
+  ({ one, many }) => ({
+    localidade: one(localidadeTable, {
+      fields: [materiaisDeTiTable.localidadeNome],
+      references: [localidadeTable.nome],
+    }),
+    solicitacoesCompra: many(solicitacaoCompraTable),
+  }),
+);
+
+export const solicitacaoCompraRelations = relations(
+  solicitacaoCompraTable,
+  ({ one, many }) => ({
+    material: one(materiaisDeTiTable, {
+      fields: [solicitacaoCompraTable.materialId],
+      references: [materiaisDeTiTable.id],
+    }),
+    cotacoes: many(solicitacaoCompraCotacaoTable),
+    cotacaoSelecionada: one(solicitacaoCompraCotacaoTable, {
+      fields: [solicitacaoCompraTable.cotacaoSelecionadaId],
+      references: [solicitacaoCompraCotacaoTable.id],
+    }),
+    recebidoPorUsuario: one(usersTable, {
+      fields: [solicitacaoCompraTable.recebidoPor],
+      references: [usersTable.id],
+    }),
+  }),
+);
+
+export const solicitacaoCompraCotacaoRelations = relations(
+  solicitacaoCompraCotacaoTable,
+  ({ one }) => ({
+    solicitacao: one(solicitacaoCompraTable, {
+      fields: [solicitacaoCompraCotacaoTable.solicitacaoCompraId],
+      references: [solicitacaoCompraTable.id],
+    }),
+  }),
+);
+
+export const logsTable = pgTable("logs", {
+  id: text("id").primaryKey(),
+  tipo: text("tipo").notNull(), // "solicitacao_compra", "pedido_interno", "material_ti", "toner", etc
+  entidadeId: text("entidade_id").notNull(), // ID da entidade que foi alterada
+  acao: text("acao").notNull(), // "criado", "atualizado", "deletado", "status_alterado", etc
+  descricao: text("descricao"), // Descrição da ação
+  dadosAnteriores: text("dados_anteriores"), // JSON com dados anteriores
+  dadosNovos: text("dados_novos"), // JSON com dados novos
+  updateUserId: text("update_user_id")
+    .notNull()
+    .references(() => usersTable.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const pedidoInternoRelations = relations(
+  pedidoInternoTable,
+  ({ one }) => ({
+    localidade: one(localidadeTable, {
+      fields: [pedidoInternoTable.localidadeNome],
+      references: [localidadeTable.nome],
+    }),
+    impressora: one(impressoraTable, {
+      fields: [pedidoInternoTable.impressoraNome],
+      references: [impressoraTable.nome],
+    }),
+    solicitante: one(usersTable, {
+      fields: [pedidoInternoTable.solicitanteId],
+      references: [usersTable.id],
+    }),
+  }),
+);
+
+export const logsRelations = relations(logsTable, ({ one }) => ({
+  usuario: one(usersTable, {
+    fields: [logsTable.updateUserId],
+    references: [usersTable.id],
+  }),
+}));
+
+export const notificacoesTable = pgTable("notificacoes", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  tipo: text("tipo").notNull(), // "estoque_baixo", "solicitacao_pendente", "pedido_pendente", "sistema"
+  titulo: text("titulo").notNull(),
+  mensagem: text("mensagem").notNull(),
+  link: text("link"), // URL para a página relacionada
+  lida: boolean("lida").notNull().default(false),
+  prioridade: text("prioridade").notNull().default("normal"), // "baixa", "normal", "alta", "critica"
+  entidadeId: text("entidade_id"), // ID da entidade relacionada (opcional)
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lidaEm: timestamp("lida_em"),
+});
+
+export const notificacoesRelations = relations(
+  notificacoesTable,
+  ({ one }) => ({
+    usuario: one(usersTable, {
+      fields: [notificacoesTable.userId],
+      references: [usersTable.id],
     }),
   }),
 );

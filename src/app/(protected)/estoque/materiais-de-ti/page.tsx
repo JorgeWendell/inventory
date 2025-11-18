@@ -1,0 +1,59 @@
+"use client";
+
+import { useState } from "react";
+import { PlusIcon } from "lucide-react";
+
+import {
+  PageActions,
+  PageContainer,
+  PageContent,
+  PageDescription,
+  PageHeader,
+  PageHeaderContent,
+  PageTitle,
+} from "@/components/ui/page-container";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+
+import MateriaisTable from "./components/materiais-table";
+import UpsertMaterialForm from "./components/upsert-material-form";
+
+const MateriaisDeTiPage = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  return (
+    <PageContainer>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <PageHeader>
+          <PageHeaderContent>
+            <PageTitle>Materiais de TI</PageTitle>
+            <PageDescription>
+              Cadastre e acompanhe o estoque dos materiais de TI.
+            </PageDescription>
+          </PageHeaderContent>
+          <PageActions>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusIcon className="mr-2 h-4 w-4" />
+                Novo Produto
+              </Button>
+            </DialogTrigger>
+          </PageActions>
+        </PageHeader>
+        <PageContent>
+          <MateriaisTable refreshKey={refreshKey} />
+        </PageContent>
+        <UpsertMaterialForm
+          open={isDialogOpen}
+          setOpen={setIsDialogOpen}
+          onSuccess={() => {
+            setRefreshKey((prev) => prev + 1);
+          }}
+        />
+      </Dialog>
+    </PageContainer>
+  );
+};
+
+export default MateriaisDeTiPage;
