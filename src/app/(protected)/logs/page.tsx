@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ProtectedRoute } from "@/components/permissions/protected-route";
 import {
   PageContainer,
   PageContent,
@@ -20,7 +21,8 @@ const LogsPage = () => {
   };
 
   return (
-    <PageContainer>
+    <ProtectedRoute route="/logs">
+      <PageContainer>
       <PageHeader>
         <PageHeaderContent>
           <PageTitle>Logs do Sistema</PageTitle>
@@ -38,6 +40,7 @@ const LogsPage = () => {
         </div>
       </PageContent>
     </PageContainer>
+    </ProtectedRoute>
   );
 };
 

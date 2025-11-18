@@ -15,6 +15,7 @@ import {
   Power,
   Printer,
   ServerIcon,
+  Shield,
   Sun,
   Users,
   UsersIcon,
@@ -63,6 +64,11 @@ const data = {
               title: "Dashboard",
               icon: LayoutDashboard,
               url: "/dashboard",
+            },
+            {
+              title: "Relatórios",
+              icon: FileText,
+              url: "/relatorios",
             },
           ],
         },
@@ -191,6 +197,7 @@ const data = {
             },
           ],
         },
+
         {
           title: "Logs",
           url: "/logs",
@@ -202,6 +209,24 @@ const data = {
               url: "/logs",
             },
           ],
+        },
+        {
+          title: "Usuários",
+          url: "/sistema/usuarios",
+          icon: Users,
+          items: [
+            {
+              title: "Usuários",
+              icon: Users,
+              url: "/sistema/usuarios",
+            },
+          ],
+        },
+        {
+          title: "Set Admin (TEMP)",
+          url: "/sistema/set-admin",
+          icon: Shield,
+          items: [],
         },
       ],
     },

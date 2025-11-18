@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Computer,
   Monitor,
@@ -9,6 +10,9 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
+import { hasPermission } from "@/lib/permissions";
+import { UserRole } from "@/constants/user-roles";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -31,6 +35,21 @@ const StatsCards = ({
   pedidosPendentes,
   estoquesBaixos,
 }: StatsCardsProps) => {
+  const session = authClient.useSession();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const userRole = mounted
+    ? ((session.data?.user as any)?.role as UserRole | undefined)
+    : undefined;
+
+  const canAccess = (permission: string) => {
+    return hasPermission(userRole, permission as any);
+  };
+
   const cards = [
     {
       title: "Computadores",
@@ -105,31 +124,52 @@ const StatsCards = ({
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
-        return (
+        const hasAccess = canAccess(
+          card.href.startsWith("/estoque")
+            ? "estoque.view"
+            : card.href.startsWith("/inventario")
+              ? "inventario.view"
+              : card.href.startsWith("/solicitacoes")
+                ? "solicitacoes.view"
+                : "dashboard.view",
+        );
+
+        const cardElement = (
+          <Card
+            className={`transition-all ${
+              hasAccess ? "hover:shadow-md cursor-pointer" : "opacity-60"
+            } ${card.alert ? "border-red-500" : ""}`}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {card.title}
+              </CardTitle>
+              <div className={`rounded-full p-2 ${card.bgColor}`}>
+                <Icon className={`h-4 w-4 ${card.color}`} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{card.value}</div>
+              {card.alert && (
+                <p className="text-xs text-red-600 dark:text-red-400">
+                  Atenção necessária
+                </p>
+              )}
+              {!hasAccess && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Sem permissão de acesso
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        );
+
+        return hasAccess ? (
           <Link key={card.title} href={card.href}>
-            <Card
-              className={`transition-all hover:shadow-md ${
-                card.alert ? "border-red-500" : ""
-              }`}
-            >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {card.title}
-                </CardTitle>
-                <div className={`rounded-full p-2 ${card.bgColor}`}>
-                  <Icon className={`h-4 w-4 ${card.color}`} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{card.value}</div>
-                {card.alert && (
-                  <p className="text-xs text-red-600 dark:text-red-400">
-                    Atenção necessária
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+            {cardElement}
           </Link>
+        ) : (
+          <div key={card.title}>{cardElement}</div>
         );
       })}
     </div>

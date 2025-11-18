@@ -29,6 +29,11 @@ export function NotificationsBadge() {
   const [notificacoes, setNotificacoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const loadNotifications = async () => {
     if (!session.data?.user?.id) return;
@@ -109,7 +114,13 @@ export function NotificationsBadge() {
     return `${days}d atrás`;
   };
 
-  if (!session.data?.user?.id) return null;
+  if (!mounted || !session.data?.user?.id) {
+    return (
+      <Button variant="ghost" size="icon" className="relative">
+        <Bell className="h-5 w-5" />
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

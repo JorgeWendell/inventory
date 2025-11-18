@@ -9,12 +9,21 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
+export const userRoleEnum = pgEnum("user_role", [
+  "VIEWER",
+  "OPERATOR",
+  "PURCHASER",
+  "AUDITOR",
+  "ADMINISTRATOR",
+]);
+
 export const usersTable = pgTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password"),
   emailVerified: boolean("email_verified").notNull(),
+  role: userRoleEnum("role").notNull().default("VIEWER"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
