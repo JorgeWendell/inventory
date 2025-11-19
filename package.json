@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "git pull && npm install && npx drizzle-kit push && npm run build && pm2 restart inventory"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
