@@ -121,6 +121,11 @@ export function canAccessRoute(
     return hasPermission(userRole, "pedidos.view");
   }
 
+  // Rota base de solicitações
+  if (route === "/solicitacoes") {
+    return hasPermission(userRole, "solicitacoes.view");
+  }
+
   // Rotas de solicitações de compra
   if (route.startsWith("/solicitacoes/solicitacao-de-compra")) {
     return hasPermission(userRole, "solicitacoes.view");
