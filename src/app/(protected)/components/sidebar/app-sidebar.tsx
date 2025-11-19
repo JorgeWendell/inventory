@@ -292,13 +292,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuItem onClick={toggleTheme}>
                   {mounted && theme === "dark" ? (
                     <>
-                      <Sun />
-                      Dark Mode
+                      <Sun className="mr-2 h-4 w-4" />
+                      Modo Claro
                     </>
                   ) : (
                     <>
-                      <Moon />
-                      Dark Mode
+                      <Moon className="mr-2 h-4 w-4" />
+                      Modo Escuro
                     </>
                   )}
                 </DropdownMenuItem>

@@ -19,11 +19,6 @@ export type Permission =
 const rolePermissions: Record<UserRole, Permission[]> = {
   VIEWER: [
     "dashboard.view",
-    "estoque.view",
-    "inventario.view",
-    "pedidos.view",
-    "solicitacoes.view",
-    "relatorios.view",
   ],
   OPERATOR: [
     "dashboard.view",
@@ -34,7 +29,6 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "inventario.edit",
     "pedidos.view",
     "pedidos.create",
-    "solicitacoes.view",
     "relatorios.view",
   ],
   PURCHASER: [
@@ -42,7 +36,6 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "estoque.view",
     "solicitacoes.view",
     "solicitacoes.manage",
-    "relatorios.view",
   ],
   AUDITOR: [
     "dashboard.view",

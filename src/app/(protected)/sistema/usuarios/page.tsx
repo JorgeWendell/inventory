@@ -43,9 +43,12 @@ const UsuariosPage = () => {
       loadUsers();
     },
     onError: (error) => {
-      toast.error(
-        error.error?.serverError ?? "Erro ao atualizar role do usuário",
-      );
+      const errorMessage =
+        error.error?.serverError ||
+        error.error?.thrownError?.message ||
+        "Erro ao atualizar role do usuário";
+      toast.error(errorMessage);
+      console.error("Erro ao atualizar role:", error);
     },
   });
 
