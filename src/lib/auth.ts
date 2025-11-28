@@ -57,11 +57,11 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:3000",
     "https://inventory.adelbr.tech",
-    "http://inventory.adelbr.tech:3000",
+    "http://inventory.adelbr.tech:9000",
     "http://192.168.15.12:3000",
   ],
   baseURL:
     process.env.NODE_ENV === "production"
-      ? "http://inventory.adelbr.tech:3000"
+      ? "http://inventory.adelbr.tech:9000"
       : "http://192.168.15.53:3000",
 });
