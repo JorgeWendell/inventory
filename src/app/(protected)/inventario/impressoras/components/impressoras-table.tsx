@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TablePagination } from "@/components/common/table-pagination";
 import { getImpressorasTable } from "@/actions/get-impressoras-table";
 import { deleteImpressora } from "@/actions/delete-impressora";
 
@@ -35,6 +36,8 @@ interface ImpressorasTableProps {
 const ImpressorasTable = ({ refreshKey, searchTerm = "" }: ImpressorasTableProps) => {
   const [impressoras, setImpressoras] = useState<ImpressoraTableData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadImpressoras = () => {
     setLoading(true);
@@ -45,7 +48,8 @@ const ImpressorasTable = ({ refreshKey, searchTerm = "" }: ImpressorasTableProps
 
   useEffect(() => {
     loadImpressoras();
-  }, [refreshKey]);
+    setCurrentPage(1);
+  }, [refreshKey, searchTerm]);
 
   const filteredImpressoras = useMemo(() => {
     if (!searchTerm) return impressoras;
@@ -82,9 +86,16 @@ const ImpressorasTable = ({ refreshKey, searchTerm = "" }: ImpressorasTableProps
     );
   }
 
-  const hasSearchResults = searchTerm && filteredImpressoras.length > 0;
-  const firstResult = hasSearchResults ? filteredImpressoras[0] : null;
-  const otherResults = hasSearchResults ? filteredImpressoras.slice(1) : filteredImpressoras;
+  const totalPages = Math.ceil(filteredImpressoras.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedImpressoras = filteredImpressoras.slice(startIndex, endIndex);
+
+  const hasSearchResults = searchTerm && filteredImpressoras.length > 0 && currentPage === 1;
+  const firstResult = hasSearchResults && paginatedImpressoras.length > 0 ? paginatedImpressoras[0] : null;
+  const otherResults = hasSearchResults && paginatedImpressoras.length > 0 
+    ? paginatedImpressoras.slice(1) 
+    : paginatedImpressoras;
 
   return (
     <div className="rounded-md border">
@@ -138,6 +149,11 @@ const ImpressorasTable = ({ refreshKey, searchTerm = "" }: ImpressorasTableProps
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

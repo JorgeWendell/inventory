@@ -14,12 +14,14 @@ export async function getRelatorioComputadores() {
       memoria: computadoresTable.memoria,
       disco: computadoresTable.disco,
       garantia: computadoresTable.garantia,
+      manutencao: computadoresTable.manutencao,
       localidade: computadoresTable.localidadeNome,
       usuario: computadoresTable.usuarioNome,
       updateUserName: usersTable.name,
     })
     .from(computadoresTable)
-    .leftJoin(usersTable, eq(computadoresTable.updateUserId, usersTable.id));
+    .leftJoin(usersTable, eq(computadoresTable.updateUserId, usersTable.id))
+    .orderBy(computadoresTable.nome);
 
   return computadores.map((c) => ({
     nome: c.nome,
@@ -29,6 +31,7 @@ export async function getRelatorioComputadores() {
     memoria: c.memoria || "N/A",
     disco: c.disco || "N/A",
     garantia: c.garantia ? new Date(c.garantia).toLocaleDateString("pt-BR") : "N/A",
+    manutencao: c.manutencao ? "Sim" : "Não",
     localidade: c.localidade || "N/A",
     usuario: c.usuario || "N/A",
     atualizadoPor: c.updateUserName || "N/A",

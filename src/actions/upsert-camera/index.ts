@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { camerasTable, camerasUsuariosTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
+import { createLog } from "@/actions/create-log";
 
 import { upsertCameraSchema } from "./schema";
 
@@ -48,6 +49,31 @@ export const upsertCamera = actionClient
         })
         .where(eq(camerasTable.id, parsedInput.id));
 
+      if (cameraExistente.length > 0) {
+        await createLog({
+          tipo: "camera",
+          entidadeId: parsedInput.id,
+          acao: "atualizado",
+          descricao: `Câmera atualizada: ${parsedInput.nome}`,
+          dadosAnteriores: {
+            nome: cameraExistente[0].nome,
+            localidade: cameraExistente[0].localidade,
+            quantidadeCameras: cameraExistente[0].quantidadeCameras,
+            intelbrasId: cameraExistente[0].intelbrasId,
+            nobreakId: cameraExistente[0].nobreakId,
+          },
+          dadosNovos: {
+            nome: parsedInput.nome,
+            localidade: parsedInput.localidade,
+            quantidadeCameras: parsedInput.quantidadeCameras,
+            intelbrasId: parsedInput.intelbrasId,
+            nobreakId: parsedInput.nobreakId,
+            usuariosNome: parsedInput.usuariosNome,
+          },
+          updateUserId: session.user.id,
+        });
+      }
+
       await db
         .delete(camerasUsuariosTable)
         .where(eq(camerasUsuariosTable.cameraId, parsedInput.id));
@@ -73,6 +99,22 @@ export const upsertCamera = actionClient
         updateUserId: session.user.id,
         createdAt: new Date(),
         updatedAt: new Date(),
+      });
+
+      await createLog({
+        tipo: "camera",
+        entidadeId: id,
+        acao: "criado",
+        descricao: `Câmera criada: ${parsedInput.nome}`,
+        dadosNovos: {
+          nome: parsedInput.nome,
+          localidade: parsedInput.localidade,
+          quantidadeCameras: parsedInput.quantidadeCameras,
+          intelbrasId: parsedInput.intelbrasId,
+          nobreakId: parsedInput.nobreakId,
+          usuariosNome: parsedInput.usuariosNome,
+        },
+        updateUserId: session.user.id,
       });
 
       if (parsedInput.usuariosNome.length > 0) {

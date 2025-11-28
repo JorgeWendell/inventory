@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import { getLogsTable } from "@/actions/get-logs-table";
 import {
@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TablePagination } from "@/components/common/table-pagination";
 
 import LogsTableRow from "./logs-table-row";
 
@@ -33,6 +34,8 @@ interface LogsTableProps {
 const LogsTable = ({ searchTerm = "" }: LogsTableProps) => {
   const [logs, setLogs] = useState<LogTableData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadLogs = () => {
     setLoading(true);
@@ -43,7 +46,15 @@ const LogsTable = ({ searchTerm = "" }: LogsTableProps) => {
 
   useEffect(() => {
     loadLogs();
+    setCurrentPage(1);
   }, [searchTerm]);
+
+  const filteredLogs = useMemo(() => logs, [logs]);
+
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedLogs = filteredLogs.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -66,17 +77,22 @@ const LogsTable = ({ searchTerm = "" }: LogsTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {logs.length === 0 ? (
+          {filteredLogs.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="text-center text-muted-foreground">
                 Nenhum log encontrado
               </TableCell>
             </TableRow>
           ) : (
-            logs.map((log) => <LogsTableRow key={log.id} log={log} />)
+            paginatedLogs.map((log) => <LogsTableRow key={log.id} log={log} />)
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

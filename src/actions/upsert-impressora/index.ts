@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { impressoraTable, impressorasTonersTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
+import { createLog } from "@/actions/create-log";
 
 import { upsertImpressoraSchema } from "./schema";
 
@@ -61,6 +62,30 @@ export const upsertImpressora = actionClient
         })
         .where(eq(impressoraTable.id, parsedInput.id));
 
+      if (impressoraExistente.length > 0) {
+        await createLog({
+          tipo: "impressora",
+          entidadeId: parsedInput.id,
+          acao: "atualizado",
+          descricao: `Impressora atualizada: ${parsedInput.nome}`,
+          dadosAnteriores: {
+            nome: impressoraExistente[0].nome,
+            marca: impressoraExistente[0].marca,
+            modelo: impressoraExistente[0].modelo,
+            manutencao: impressoraExistente[0].manutencao,
+            localidadeNome: impressoraExistente[0].localidadeNome,
+          },
+          dadosNovos: {
+            nome: parsedInput.nome,
+            marca: parsedInput.marca,
+            modelo: parsedInput.modelo,
+            manutencao: parsedInput.manutencao,
+            localidadeNome: parsedInput.localidadeNome,
+          },
+          updateUserId: session.user.id,
+        });
+      }
+
       await db
         .delete(impressorasTonersTable)
         .where(eq(impressorasTonersTable.impressoraId, parsedInput.id));
@@ -97,6 +122,21 @@ export const upsertImpressora = actionClient
         updateUserId: session.user.id,
         createdAt: new Date(),
         updatedAt: new Date(),
+      });
+
+      await createLog({
+        tipo: "impressora",
+        entidadeId: id,
+        acao: "criado",
+        descricao: `Impressora criada: ${parsedInput.nome}`,
+        dadosNovos: {
+          nome: parsedInput.nome,
+          marca: parsedInput.marca,
+          modelo: parsedInput.modelo,
+          manutencao: parsedInput.manutencao,
+          localidadeNome: parsedInput.localidadeNome,
+        },
+        updateUserId: session.user.id,
       });
 
       if (parsedInput.toners.length > 0) {

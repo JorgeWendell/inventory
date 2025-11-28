@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { tonerTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
+import { createLog } from "@/actions/create-log";
 
 import { upsertTonerSchema } from "./schema";
 
@@ -61,6 +62,32 @@ export const upsertToner = actionClient
           updatedAt: new Date(),
         })
         .where(eq(tonerTable.id, parsedInput.id));
+
+      if (tonerExistente.length > 0) {
+        await createLog({
+          tipo: "toner",
+          entidadeId: parsedInput.id,
+          acao: "atualizado",
+          descricao: `Toner atualizado: ${parsedInput.nome}`,
+          dadosAnteriores: {
+            nome: tonerExistente[0].nome,
+            cor: tonerExistente[0].cor,
+            estoqueMin: tonerExistente[0].estoqueMin,
+            estoqueAtual: tonerExistente[0].estoqueAtual,
+            localidadeNome: tonerExistente[0].localidadeNome,
+            impressoraNome: tonerExistente[0].impressoraNome,
+          },
+          dadosNovos: {
+            nome: parsedInput.nome,
+            cor: parsedInput.cor,
+            estoqueMin: parsedInput.estoqueMin || 0,
+            estoqueAtual: parsedInput.estoqueAtual || 0,
+            localidadeNome: parsedInput.localidadeNome,
+            impressoraNome: parsedInput.impressoraNome,
+          },
+          updateUserId: session.user.id,
+        });
+      }
     } else {
       const nomeExistente = await db
         .select()
@@ -83,6 +110,22 @@ export const upsertToner = actionClient
         updateUserId: session.user.id,
         createdAt: new Date(),
         updatedAt: new Date(),
+      });
+
+      await createLog({
+        tipo: "toner",
+        entidadeId: id,
+        acao: "criado",
+        descricao: `Toner criado: ${parsedInput.nome}`,
+        dadosNovos: {
+          nome: parsedInput.nome,
+          cor: parsedInput.cor,
+          estoqueMin: parsedInput.estoqueMin || 0,
+          estoqueAtual: parsedInput.estoqueAtual || 0,
+          localidadeNome: parsedInput.localidadeNome,
+          impressoraNome: parsedInput.impressoraNome,
+        },
+        updateUserId: session.user.id,
       });
     }
 

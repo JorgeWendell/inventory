@@ -27,6 +27,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -44,6 +45,7 @@ const formSchema = z.object({
   memoria: z.string().optional(),
   disco: z.string().optional(),
   garantia: z.string().optional(),
+  manutencao: z.boolean().optional(),
   localidadeNome: z.string().optional(),
   usuarioNome: z.string().optional(),
 });
@@ -76,6 +78,7 @@ const UpsertComputadorForm = ({
       garantia: computador?.garantia
         ? new Date(computador.garantia).toISOString().split("T")[0]
         : "",
+      manutencao: computador?.manutencao ?? false,
       localidadeNome: computador?.localidadeNome || undefined,
       usuarioNome: computador?.usuarioNome || undefined,
     },
@@ -102,6 +105,7 @@ const UpsertComputadorForm = ({
         garantia: computador.garantia
           ? new Date(computador.garantia).toISOString().split("T")[0]
           : "",
+        manutencao: computador.manutencao ?? false,
         localidadeNome: computador.localidadeNome || undefined,
         usuarioNome: computador.usuarioNome || undefined,
       });
@@ -239,6 +243,23 @@ const UpsertComputadorForm = ({
                   <Input type="date" {...field} />
                 </FormControl>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="manutencao"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Em Manutenção</FormLabel>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
               </FormItem>
             )}
           />

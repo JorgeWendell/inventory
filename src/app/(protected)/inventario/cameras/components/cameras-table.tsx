@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TablePagination } from "@/components/common/table-pagination";
 import { getCamerasTable } from "@/actions/get-cameras-table";
 import { deleteCamera } from "@/actions/delete-camera";
 
@@ -35,6 +36,8 @@ interface CamerasTableProps {
 const CamerasTable = ({ refreshKey, searchTerm = "" }: CamerasTableProps) => {
   const [cameras, setCameras] = useState<CameraTableData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadCameras = () => {
     setLoading(true);
@@ -45,7 +48,8 @@ const CamerasTable = ({ refreshKey, searchTerm = "" }: CamerasTableProps) => {
 
   useEffect(() => {
     loadCameras();
-  }, [refreshKey]);
+    setCurrentPage(1);
+  }, [refreshKey, searchTerm]);
 
   const filteredCameras = useMemo(() => {
     if (!searchTerm) return cameras;
@@ -81,9 +85,16 @@ const CamerasTable = ({ refreshKey, searchTerm = "" }: CamerasTableProps) => {
     );
   }
 
-  const hasSearchResults = searchTerm && filteredCameras.length > 0;
-  const firstResult = hasSearchResults ? filteredCameras[0] : null;
-  const otherResults = hasSearchResults ? filteredCameras.slice(1) : filteredCameras;
+  const totalPages = Math.ceil(filteredCameras.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedCameras = filteredCameras.slice(startIndex, endIndex);
+
+  const hasSearchResults = searchTerm && filteredCameras.length > 0 && currentPage === 1;
+  const firstResult = hasSearchResults && paginatedCameras.length > 0 ? paginatedCameras[0] : null;
+  const otherResults = hasSearchResults && paginatedCameras.length > 0 
+    ? paginatedCameras.slice(1) 
+    : paginatedCameras;
 
   return (
     <div className="rounded-md border">
@@ -137,6 +148,11 @@ const CamerasTable = ({ refreshKey, searchTerm = "" }: CamerasTableProps) => {
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

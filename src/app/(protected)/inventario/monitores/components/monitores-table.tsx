@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TablePagination } from "@/components/common/table-pagination";
 import { getMonitoresTable } from "@/actions/get-monitores-table";
 import { deleteMonitor } from "@/actions/delete-monitor";
 
@@ -34,6 +35,8 @@ interface MonitoresTableProps {
 const MonitoresTable = ({ refreshKey, searchTerm = "" }: MonitoresTableProps) => {
   const [monitores, setMonitores] = useState<MonitorTableData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadMonitores = () => {
     setLoading(true);
@@ -44,7 +47,8 @@ const MonitoresTable = ({ refreshKey, searchTerm = "" }: MonitoresTableProps) =>
 
   useEffect(() => {
     loadMonitores();
-  }, [refreshKey]);
+    setCurrentPage(1);
+  }, [refreshKey, searchTerm]);
 
   const filteredMonitores = useMemo(() => {
     if (!searchTerm) return monitores;
@@ -80,9 +84,16 @@ const MonitoresTable = ({ refreshKey, searchTerm = "" }: MonitoresTableProps) =>
     );
   }
 
-  const hasSearchResults = searchTerm && filteredMonitores.length > 0;
-  const firstResult = hasSearchResults ? filteredMonitores[0] : null;
-  const otherResults = hasSearchResults ? filteredMonitores.slice(1) : filteredMonitores;
+  const totalPages = Math.ceil(filteredMonitores.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedMonitores = filteredMonitores.slice(startIndex, endIndex);
+
+  const hasSearchResults = searchTerm && filteredMonitores.length > 0 && currentPage === 1;
+  const firstResult = hasSearchResults && paginatedMonitores.length > 0 ? paginatedMonitores[0] : null;
+  const otherResults = hasSearchResults && paginatedMonitores.length > 0 
+    ? paginatedMonitores.slice(1) 
+    : paginatedMonitores;
 
   return (
     <div className="rounded-md border">
@@ -134,6 +145,11 @@ const MonitoresTable = ({ refreshKey, searchTerm = "" }: MonitoresTableProps) =>
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

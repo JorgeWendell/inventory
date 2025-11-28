@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TablePagination } from "@/components/common/table-pagination";
 import { getAcessosDepartamentosTable } from "@/actions/get-acessos-departamentos-table";
 import { deleteAcessoDepartamento } from "@/actions/delete-acesso-departamento";
 
@@ -33,6 +34,8 @@ interface AcessosDepartamentosTableProps {
 const AcessosDepartamentosTable = ({ refreshKey, searchTerm = "" }: AcessosDepartamentosTableProps) => {
   const [acessosDepartamentos, setAcessosDepartamentos] = useState<AcessoDepartamentoTableData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadAcessosDepartamentos = () => {
     setLoading(true);
@@ -43,7 +46,8 @@ const AcessosDepartamentosTable = ({ refreshKey, searchTerm = "" }: AcessosDepar
 
   useEffect(() => {
     loadAcessosDepartamentos();
-  }, [refreshKey]);
+    setCurrentPage(1);
+  }, [refreshKey, searchTerm]);
 
   const filteredAcessosDepartamentos = useMemo(() => {
     if (!searchTerm) return acessosDepartamentos;
@@ -79,9 +83,16 @@ const AcessosDepartamentosTable = ({ refreshKey, searchTerm = "" }: AcessosDepar
     );
   }
 
-  const hasSearchResults = searchTerm && filteredAcessosDepartamentos.length > 0;
-  const firstResult = hasSearchResults ? filteredAcessosDepartamentos[0] : null;
-  const otherResults = hasSearchResults ? filteredAcessosDepartamentos.slice(1) : filteredAcessosDepartamentos;
+  const totalPages = Math.ceil(filteredAcessosDepartamentos.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedAcessosDepartamentos = filteredAcessosDepartamentos.slice(startIndex, endIndex);
+
+  const hasSearchResults = searchTerm && filteredAcessosDepartamentos.length > 0 && currentPage === 1;
+  const firstResult = hasSearchResults && paginatedAcessosDepartamentos.length > 0 ? paginatedAcessosDepartamentos[0] : null;
+  const otherResults = hasSearchResults && paginatedAcessosDepartamentos.length > 0 
+    ? paginatedAcessosDepartamentos.slice(1) 
+    : paginatedAcessosDepartamentos;
 
   return (
     <div className="rounded-md border">
@@ -131,6 +142,11 @@ const AcessosDepartamentosTable = ({ refreshKey, searchTerm = "" }: AcessosDepar
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

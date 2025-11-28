@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TablePagination } from "@/components/common/table-pagination";
 import { getNobreaksTable } from "@/actions/get-nobreaks-table";
 import { deleteNobreak } from "@/actions/delete-nobreak";
 
@@ -36,6 +37,8 @@ interface NobreaksTableProps {
 const NobreaksTable = ({ refreshKey, searchTerm = "" }: NobreaksTableProps) => {
   const [nobreaks, setNobreaks] = useState<NobreakTableData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadNobreaks = () => {
     setLoading(true);
@@ -46,7 +49,8 @@ const NobreaksTable = ({ refreshKey, searchTerm = "" }: NobreaksTableProps) => {
 
   useEffect(() => {
     loadNobreaks();
-  }, [refreshKey]);
+    setCurrentPage(1);
+  }, [refreshKey, searchTerm]);
 
   const filteredNobreaks = useMemo(() => {
     if (!searchTerm) return nobreaks;
@@ -84,9 +88,16 @@ const NobreaksTable = ({ refreshKey, searchTerm = "" }: NobreaksTableProps) => {
     );
   }
 
-  const hasSearchResults = searchTerm && filteredNobreaks.length > 0;
-  const firstResult = hasSearchResults ? filteredNobreaks[0] : null;
-  const otherResults = hasSearchResults ? filteredNobreaks.slice(1) : filteredNobreaks;
+  const totalPages = Math.ceil(filteredNobreaks.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedNobreaks = filteredNobreaks.slice(startIndex, endIndex);
+
+  const hasSearchResults = searchTerm && filteredNobreaks.length > 0 && currentPage === 1;
+  const firstResult = hasSearchResults && paginatedNobreaks.length > 0 ? paginatedNobreaks[0] : null;
+  const otherResults = hasSearchResults && paginatedNobreaks.length > 0 
+    ? paginatedNobreaks.slice(1) 
+    : paginatedNobreaks;
 
   return (
     <div className="rounded-md border">
@@ -142,6 +153,11 @@ const NobreaksTable = ({ refreshKey, searchTerm = "" }: NobreaksTableProps) => {
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

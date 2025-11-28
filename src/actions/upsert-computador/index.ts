@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { computadoresTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
+import { createLog } from "@/actions/create-log";
 
 import { upsertComputadorSchema } from "./schema";
 
@@ -60,12 +61,39 @@ export const upsertComputador = actionClient
           garantia: parsedInput.garantia
             ? new Date(parsedInput.garantia)
             : null,
+          manutencao: parsedInput.manutencao ?? false,
           localidadeNome: parsedInput.localidadeNome || null,
           usuarioNome: parsedInput.usuarioNome || null,
           updateUserId: session.user.id,
           updatedAt: new Date(),
         })
         .where(eq(computadoresTable.id, parsedInput.id));
+
+      if (computadorExistente.length > 0) {
+        await createLog({
+          tipo: "computador",
+          entidadeId: parsedInput.id,
+          acao: "atualizado",
+          descricao: `Computador atualizado: ${parsedInput.nome}`,
+          dadosAnteriores: {
+            nome: computadorExistente[0].nome,
+            marca: computadorExistente[0].marca,
+            modelo: computadorExistente[0].modelo,
+            manutencao: computadorExistente[0].manutencao,
+            localidadeNome: computadorExistente[0].localidadeNome,
+            usuarioNome: computadorExistente[0].usuarioNome,
+          },
+          dadosNovos: {
+            nome: parsedInput.nome,
+            marca: parsedInput.marca,
+            modelo: parsedInput.modelo,
+            manutencao: parsedInput.manutencao ?? false,
+            localidadeNome: parsedInput.localidadeNome,
+            usuarioNome: parsedInput.usuarioNome,
+          },
+          updateUserId: session.user.id,
+        });
+      }
     } else {
       const nomeExistente = await db
         .select()
@@ -88,11 +116,28 @@ export const upsertComputador = actionClient
         garantia: parsedInput.garantia
           ? new Date(parsedInput.garantia)
           : null,
+        manutencao: parsedInput.manutencao ?? false,
         localidadeNome: parsedInput.localidadeNome || null,
         usuarioNome: parsedInput.usuarioNome || null,
         updateUserId: session.user.id,
         createdAt: new Date(),
         updatedAt: new Date(),
+      });
+
+      await createLog({
+        tipo: "computador",
+        entidadeId: id,
+        acao: "criado",
+        descricao: `Computador criado: ${parsedInput.nome}`,
+        dadosNovos: {
+          nome: parsedInput.nome,
+          marca: parsedInput.marca,
+          modelo: parsedInput.modelo,
+          manutencao: parsedInput.manutencao ?? false,
+          localidadeNome: parsedInput.localidadeNome,
+          usuarioNome: parsedInput.usuarioNome,
+        },
+        updateUserId: session.user.id,
       });
     }
 

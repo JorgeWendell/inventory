@@ -10,6 +10,7 @@ interface ComputadoresTableRowProps {
     nome: string;
     marca: string;
     modelo: string;
+    manutencao: boolean;
     localidadeNome: string;
     usuarioNome: string;
     editadoPor: string;
@@ -28,8 +29,9 @@ const ComputadoresTableRow = ({
       <TableCell className="font-medium">{computador.nome}</TableCell>
       <TableCell>{computador.marca}</TableCell>
       <TableCell>{computador.modelo}</TableCell>
-      <TableCell>{computador.localidadeNome}</TableCell>
       <TableCell>{computador.usuarioNome}</TableCell>
+      <TableCell>{computador.localidadeNome}</TableCell>
+      <TableCell>{computador.manutencao ? "Sim" : "Não"}</TableCell>
       <TableCell>{computador.editadoPor}</TableCell>
       <TableCell className="text-right">
         <ComputadoresTableActions

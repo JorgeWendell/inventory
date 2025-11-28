@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TablePagination } from "@/components/common/table-pagination";
 import { getUsuariosTable } from "@/actions/get-usuarios-table";
 import { deleteUsuario } from "@/actions/delete-usuario";
 
@@ -34,6 +35,8 @@ interface UsuariosTableProps {
 const UsuariosTable = ({ refreshKey, searchTerm = "" }: UsuariosTableProps) => {
   const [usuarios, setUsuarios] = useState<UsuarioTableData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadUsuarios = () => {
     setLoading(true);
@@ -44,7 +47,8 @@ const UsuariosTable = ({ refreshKey, searchTerm = "" }: UsuariosTableProps) => {
 
   useEffect(() => {
     loadUsuarios();
-  }, [refreshKey]);
+    setCurrentPage(1);
+  }, [refreshKey, searchTerm]);
 
   const filteredUsuarios = useMemo(() => {
     if (!searchTerm) return usuarios;
@@ -79,9 +83,16 @@ const UsuariosTable = ({ refreshKey, searchTerm = "" }: UsuariosTableProps) => {
     );
   }
 
-  const hasSearchResults = searchTerm && filteredUsuarios.length > 0;
-  const firstResult = hasSearchResults ? filteredUsuarios[0] : null;
-  const otherResults = hasSearchResults ? filteredUsuarios.slice(1) : filteredUsuarios;
+  const totalPages = Math.ceil(filteredUsuarios.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedUsuarios = filteredUsuarios.slice(startIndex, endIndex);
+
+  const hasSearchResults = searchTerm && filteredUsuarios.length > 0 && currentPage === 1;
+  const firstResult = hasSearchResults && paginatedUsuarios.length > 0 ? paginatedUsuarios[0] : null;
+  const otherResults = hasSearchResults && paginatedUsuarios.length > 0 
+    ? paginatedUsuarios.slice(1) 
+    : paginatedUsuarios;
 
   return (
     <div className="rounded-md border">
@@ -133,6 +144,11 @@ const UsuariosTable = ({ refreshKey, searchTerm = "" }: UsuariosTableProps) => {
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

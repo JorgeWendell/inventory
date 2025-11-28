@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Download, Calendar } from "lucide-react";
+import { FileText, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import { ProtectedRoute } from "@/components/permissions/protected-route";
 import {
@@ -179,6 +181,75 @@ const RelatoriosPage = () => {
     toast.success("Relatório exportado com sucesso!");
   };
 
+  const exportarPDF = () => {
+    if (dados.length === 0) {
+      toast.error("Não há dados para exportar");
+      return;
+    }
+
+    const doc = new jsPDF("landscape", "mm", "a4");
+    
+    const tipoRelatorioNome = {
+      movimentacoes: "Movimentações de Estoque",
+      solicitacoes: "Solicitações de Compra",
+      pedidos: "Pedidos Internos",
+      inventario: "Inventário Completo",
+      usuarios: "Usuários",
+      computadores: "Computadores",
+      monitores: "Monitores",
+      impressoras: "Impressoras",
+      toners: "Toners",
+      nobreaks: "Nobreaks",
+      cameras: "Câmeras",
+      office: "Office",
+      "acessos-departamentos": "Acessos Departamentos",
+      servidores: "Servidores",
+    }[tipoRelatorio] || "Relatório";
+
+    doc.setFontSize(16);
+    doc.text(tipoRelatorioNome, 14, 15);
+    
+    doc.setFontSize(10);
+    const dataGeracao = new Date().toLocaleString("pt-BR");
+    doc.text(`Gerado em: ${dataGeracao}`, 14, 22);
+    
+    if (dataInicio || dataFim) {
+      const periodo = `Período: ${dataInicio || "Início"} até ${dataFim || "Fim"}`;
+      doc.text(periodo, 14, 27);
+    }
+
+    const allHeaders = Object.keys(dados[0]);
+    const headers = allHeaders.filter((header) => 
+      header.toLowerCase() !== "atualizadopor" && 
+      header.toLowerCase() !== "atualizado por"
+    );
+    const rows = dados.map((item) =>
+      headers.map((header) => {
+        const value = item[header];
+        if (value === null || value === undefined) return "N/A";
+        if (typeof value === "object") return JSON.stringify(value);
+        if (header.includes("Date") || header.includes("At")) {
+          return formatDate(value);
+        }
+        return String(value);
+      })
+    );
+
+    autoTable(doc, {
+      head: [headers],
+      body: rows,
+      startY: dataInicio || dataFim ? 32 : 27,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [66, 139, 202], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      margin: { top: dataInicio || dataFim ? 32 : 27 },
+    });
+
+    const fileName = `relatorio-${tipoRelatorio}-${new Date().toISOString().split("T")[0]}.pdf`;
+    doc.save(fileName);
+    toast.success("Relatório PDF exportado com sucesso!");
+  };
+
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -334,9 +405,9 @@ const RelatoriosPage = () => {
                   {loading ? "Carregando..." : "Gerar Relatório"}
                 </Button>
                 {dados.length > 0 && (
-                  <Button onClick={exportarCSV} variant="outline">
-                    <Download className="mr-2 h-4 w-4" />
-                    Exportar CSV
+                  <Button onClick={exportarPDF} variant="outline">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Exportar PDF
                   </Button>
                 )}
               </div>

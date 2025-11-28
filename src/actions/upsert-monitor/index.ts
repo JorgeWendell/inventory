@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { monitorTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
+import { createLog } from "@/actions/create-log";
 
 import { upsertMonitorSchema } from "./schema";
 
@@ -46,6 +47,28 @@ export const upsertMonitor = actionClient
           updatedAt: new Date(),
         })
         .where(eq(monitorTable.id, parsedInput.id));
+
+      if (monitorExistente.length > 0) {
+        await createLog({
+          tipo: "monitor",
+          entidadeId: parsedInput.id,
+          acao: "atualizado",
+          descricao: `Monitor atualizado: ${monitorExistente[0].marca || ""} ${monitorExistente[0].modelo || ""}`.trim(),
+          dadosAnteriores: {
+            marca: monitorExistente[0].marca,
+            modelo: monitorExistente[0].modelo,
+            localidadeNome: monitorExistente[0].localidadeNome,
+            usuarioNome: monitorExistente[0].usuarioNome,
+          },
+          dadosNovos: {
+            marca: parsedInput.marca,
+            modelo: parsedInput.modelo,
+            localidadeNome: parsedInput.localidadeNome,
+            usuarioNome: parsedInput.usuarioNome,
+          },
+          updateUserId: session.user.id,
+        });
+      }
     } else {
       await db.insert(monitorTable).values({
         id,
@@ -56,6 +79,20 @@ export const upsertMonitor = actionClient
         updateUserId: session.user.id,
         createdAt: new Date(),
         updatedAt: new Date(),
+      });
+
+      await createLog({
+        tipo: "monitor",
+        entidadeId: id,
+        acao: "criado",
+        descricao: `Monitor criado: ${parsedInput.marca || ""} ${parsedInput.modelo || ""}`.trim(),
+        dadosNovos: {
+          marca: parsedInput.marca,
+          modelo: parsedInput.modelo,
+          localidadeNome: parsedInput.localidadeNome,
+          usuarioNome: parsedInput.usuarioNome,
+        },
+        updateUserId: session.user.id,
       });
     }
 

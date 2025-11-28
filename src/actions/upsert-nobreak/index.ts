@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { nobreakTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
+import { createLog } from "@/actions/create-log";
 
 import { upsertNobreakSchema } from "./schema";
 
@@ -48,6 +49,32 @@ export const upsertNobreak = actionClient
           updatedAt: new Date(),
         })
         .where(eq(nobreakTable.id, parsedInput.id));
+
+      if (nobreakExistente.length > 0) {
+        await createLog({
+          tipo: "nobreak",
+          entidadeId: parsedInput.id,
+          acao: "atualizado",
+          descricao: `Nobreak atualizado: ${nobreakExistente[0].marca || ""} ${nobreakExistente[0].modelo || ""}`.trim(),
+          dadosAnteriores: {
+            marca: nobreakExistente[0].marca,
+            modelo: nobreakExistente[0].modelo,
+            capacidade: nobreakExistente[0].capacidade,
+            localidadeNome: nobreakExistente[0].localidadeNome,
+            usuarioNome: nobreakExistente[0].usuarioNome,
+            computadoresNome: nobreakExistente[0].computadoresNome,
+          },
+          dadosNovos: {
+            marca: parsedInput.marca,
+            modelo: parsedInput.modelo,
+            capacidade: parsedInput.capacidade,
+            localidadeNome: parsedInput.localidadeNome,
+            usuarioNome: parsedInput.usuarioNome,
+            computadoresNome: parsedInput.computadoresNome,
+          },
+          updateUserId: session.user.id,
+        });
+      }
     } else {
       await db.insert(nobreakTable).values({
         id,
@@ -60,6 +87,22 @@ export const upsertNobreak = actionClient
         updateUserId: session.user.id,
         createdAt: new Date(),
         updatedAt: new Date(),
+      });
+
+      await createLog({
+        tipo: "nobreak",
+        entidadeId: id,
+        acao: "criado",
+        descricao: `Nobreak criado: ${parsedInput.marca || ""} ${parsedInput.modelo || ""}`.trim(),
+        dadosNovos: {
+          marca: parsedInput.marca,
+          modelo: parsedInput.modelo,
+          capacidade: parsedInput.capacidade,
+          localidadeNome: parsedInput.localidadeNome,
+          usuarioNome: parsedInput.usuarioNome,
+          computadoresNome: parsedInput.computadoresNome,
+        },
+        updateUserId: session.user.id,
       });
     }
 

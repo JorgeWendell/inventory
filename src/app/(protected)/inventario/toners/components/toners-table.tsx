@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TablePagination } from "@/components/common/table-pagination";
 import { getTonersTable } from "@/actions/get-toners-table";
 
 import TonersTableRow from "./toners-table-row";
@@ -32,6 +33,8 @@ interface TonersTableProps {
 const TonersTable = ({ refreshKey, searchTerm = "" }: TonersTableProps) => {
   const [toners, setToners] = useState<TonerTableData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadToners = () => {
     setLoading(true);
@@ -42,7 +45,8 @@ const TonersTable = ({ refreshKey, searchTerm = "" }: TonersTableProps) => {
 
   useEffect(() => {
     loadToners();
-  }, [refreshKey]);
+    setCurrentPage(1);
+  }, [refreshKey, searchTerm]);
 
   const filteredToners = useMemo(() => {
     if (!searchTerm) return toners;
@@ -64,9 +68,16 @@ const TonersTable = ({ refreshKey, searchTerm = "" }: TonersTableProps) => {
     );
   }
 
-  const hasSearchResults = searchTerm && filteredToners.length > 0;
-  const firstResult = hasSearchResults ? filteredToners[0] : null;
-  const otherResults = hasSearchResults ? filteredToners.slice(1) : filteredToners;
+  const totalPages = Math.ceil(filteredToners.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedToners = filteredToners.slice(startIndex, endIndex);
+
+  const hasSearchResults = searchTerm && filteredToners.length > 0 && currentPage === 1;
+  const firstResult = hasSearchResults && paginatedToners.length > 0 ? paginatedToners[0] : null;
+  const otherResults = hasSearchResults && paginatedToners.length > 0 
+    ? paginatedToners.slice(1) 
+    : paginatedToners;
 
   return (
     <div className="rounded-md border">
@@ -118,6 +129,11 @@ const TonersTable = ({ refreshKey, searchTerm = "" }: TonersTableProps) => {
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

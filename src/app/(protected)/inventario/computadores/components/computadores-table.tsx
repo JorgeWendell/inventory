@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TablePagination } from "@/components/common/table-pagination";
 import { getComputadoresTable } from "@/actions/get-computadores-table";
 import { deleteComputador } from "@/actions/delete-computador";
 
@@ -22,6 +23,7 @@ interface ComputadorTableData {
   nome: string;
   marca: string;
   modelo: string;
+  manutencao: boolean;
   localidadeNome: string;
   usuarioNome: string;
   editadoPor: string;
@@ -35,6 +37,8 @@ interface ComputadoresTableProps {
 const ComputadoresTable = ({ refreshKey, searchTerm = "" }: ComputadoresTableProps) => {
   const [computadores, setComputadores] = useState<ComputadorTableData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadComputadores = () => {
     setLoading(true);
@@ -45,7 +49,8 @@ const ComputadoresTable = ({ refreshKey, searchTerm = "" }: ComputadoresTablePro
 
   useEffect(() => {
     loadComputadores();
-  }, [refreshKey]);
+    setCurrentPage(1);
+  }, [refreshKey, searchTerm]);
 
   const filteredComputadores = useMemo(() => {
     if (!searchTerm) return computadores;
@@ -82,9 +87,16 @@ const ComputadoresTable = ({ refreshKey, searchTerm = "" }: ComputadoresTablePro
     );
   }
 
-  const hasSearchResults = searchTerm && filteredComputadores.length > 0;
-  const firstResult = hasSearchResults ? filteredComputadores[0] : null;
-  const otherResults = hasSearchResults ? filteredComputadores.slice(1) : filteredComputadores;
+  const totalPages = Math.ceil(filteredComputadores.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedComputadores = filteredComputadores.slice(startIndex, endIndex);
+
+  const hasSearchResults = searchTerm && filteredComputadores.length > 0 && currentPage === 1;
+  const firstResult = hasSearchResults && paginatedComputadores.length > 0 ? paginatedComputadores[0] : null;
+  const otherResults = hasSearchResults && paginatedComputadores.length > 0 
+    ? paginatedComputadores.slice(1) 
+    : paginatedComputadores;
 
   return (
     <div className="rounded-md border">
@@ -94,8 +106,9 @@ const ComputadoresTable = ({ refreshKey, searchTerm = "" }: ComputadoresTablePro
             <TableHead>Nome</TableHead>
             <TableHead>Marca</TableHead>
             <TableHead>Modelo</TableHead>
-            <TableHead>Localidade</TableHead>
             <TableHead>Usuário</TableHead>
+            <TableHead>Localidade</TableHead>
+            <TableHead>Manutenção</TableHead>
             <TableHead>Editado por</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -103,7 +116,7 @@ const ComputadoresTable = ({ refreshKey, searchTerm = "" }: ComputadoresTablePro
         <TableBody>
           {filteredComputadores.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 Nenhum computador encontrado.
               </TableCell>
             </TableRow>
@@ -114,8 +127,9 @@ const ComputadoresTable = ({ refreshKey, searchTerm = "" }: ComputadoresTablePro
                   <TableCell className="font-medium">{firstResult.nome}</TableCell>
                   <TableCell>{firstResult.marca}</TableCell>
                   <TableCell>{firstResult.modelo}</TableCell>
-                  <TableCell>{firstResult.localidadeNome}</TableCell>
                   <TableCell>{firstResult.usuarioNome}</TableCell>
+                  <TableCell>{firstResult.localidadeNome}</TableCell>
+                  <TableCell>{firstResult.manutencao ? "Sim" : "Não"}</TableCell>
                   <TableCell>{firstResult.editadoPor}</TableCell>
                   <TableCell className="text-right">
                     <ComputadoresTableActions
@@ -138,6 +152,11 @@ const ComputadoresTable = ({ refreshKey, searchTerm = "" }: ComputadoresTablePro
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

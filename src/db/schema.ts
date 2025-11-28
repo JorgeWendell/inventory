@@ -137,6 +137,7 @@ export const computadoresTable = pgTable("computadores", {
   memoria: text("memoria"),
   disco: text("disco"),
   garantia: timestamp("garantia"),
+  manutencao: boolean("manutencao").default(false),
   localidadeNome: text("localidade_nome").references(
     () => localidadeTable.nome,
   ),

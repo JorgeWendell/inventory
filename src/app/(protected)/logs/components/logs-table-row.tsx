@@ -6,21 +6,18 @@ interface LogsTableRowProps {
   log: LogTableData;
 }
 
-// Função para formatar data considerando GMT-3
+// Função para formatar data considerando GMT-3 (America/Sao_Paulo)
 const formatDateBR = (dateString: string): string => {
   const date = new Date(dateString);
-  // Ajustar para GMT-3 (Brasil)
-  const offset = -3 * 60; // GMT-3 em minutos
-  const localDate = new Date(
-    date.getTime() + (offset - date.getTimezoneOffset()) * 60000,
-  );
 
-  return localDate.toLocaleString("pt-BR", {
+  return date.toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
   });
 };
 

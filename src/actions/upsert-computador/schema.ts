@@ -9,6 +9,7 @@ export const upsertComputadorSchema = z.object({
   memoria: z.string().optional(),
   disco: z.string().optional(),
   garantia: z.string().optional(),
+  manutencao: z.boolean().optional(),
   localidadeNome: z.string().optional(),
   usuarioNome: z.string().optional(),
 });
