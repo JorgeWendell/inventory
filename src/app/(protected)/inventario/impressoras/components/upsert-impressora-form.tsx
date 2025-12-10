@@ -10,6 +10,7 @@ import { X } from "lucide-react";
 
 import { upsertImpressora } from "@/actions/upsert-impressora";
 import { getLocalidades } from "@/actions/get-localidades";
+import { getUsuarios } from "@/actions/get-usuarios";
 import { getToners } from "@/actions/get-toners";
 import { getImpressoraToners } from "@/actions/get-impressora-toners";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const formSchema = z.object({
   marca: z.string().optional(),
   modelo: z.string().optional(),
   localidadeNome: z.string().optional(),
+  usuarioNome: z.string().optional(),
   manutencao: z.boolean(),
   toners: z.array(
     z.object({
@@ -67,6 +69,7 @@ const UpsertImpressoraForm = ({
   onSuccess,
 }: UpsertImpressoraFormProps) => {
   const [localidades, setLocalidades] = useState<{ nome: string }[]>([]);
+  const [usuarios, setUsuarios] = useState<{ nome: string }[]>([]);
   const [toners, setToners] = useState<{ nome: string }[]>([]);
   const [loadingToners, setLoadingToners] = useState(false);
   const [selectedToner, setSelectedToner] = useState<string>("");
@@ -81,6 +84,7 @@ const UpsertImpressoraForm = ({
       marca: "",
       modelo: "",
       localidadeNome: undefined,
+      usuarioNome: undefined,
       manutencao: false,
       toners: [],
     },
@@ -89,6 +93,7 @@ const UpsertImpressoraForm = ({
   useEffect(() => {
     if (open) {
       getLocalidades().then(setLocalidades);
+      getUsuarios().then(setUsuarios);
       getToners().then(setToners);
     }
   }, [open]);
@@ -100,6 +105,7 @@ const UpsertImpressoraForm = ({
         marca: "",
         modelo: "",
         localidadeNome: undefined,
+        usuarioNome: undefined,
         manutencao: false,
         toners: [],
       });
@@ -119,6 +125,7 @@ const UpsertImpressoraForm = ({
             marca: impressora.marca || "",
             modelo: impressora.modelo || "",
             localidadeNome: impressora.localidadeNome || undefined,
+            usuarioNome: impressora.usuarioNome || undefined,
             manutencao: impressora.manutencao || false,
             toners: tonersData,
           });
@@ -132,6 +139,7 @@ const UpsertImpressoraForm = ({
         marca: "",
         modelo: "",
         localidadeNome: undefined,
+        usuarioNome: undefined,
         manutencao: false,
         toners: [],
       });
@@ -275,6 +283,35 @@ const UpsertImpressoraForm = ({
                     {localidades.map((localidade) => (
                       <SelectItem key={localidade.nome} value={localidade.nome}>
                         {localidade.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="usuarioNome"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Usuário</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value || undefined);
+                  }}
+                  value={field.value || undefined}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um usuário (opcional)" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {usuarios.map((usuario) => (
+                      <SelectItem key={usuario.nome} value={usuario.nome}>
+                        {usuario.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>

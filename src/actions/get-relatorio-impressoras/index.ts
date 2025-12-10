@@ -11,6 +11,7 @@ export async function getRelatorioImpressoras() {
       marca: impressoraTable.marca,
       modelo: impressoraTable.modelo,
       localidade: impressoraTable.localidadeNome,
+      usuario: impressoraTable.usuarioNome,
       manutencao: impressoraTable.manutencao,
       updateUserName: usersTable.name,
     })
@@ -22,6 +23,7 @@ export async function getRelatorioImpressoras() {
     marca: i.marca || "N/A",
     modelo: i.modelo || "N/A",
     localidade: i.localidade || "N/A",
+    usuario: i.usuario || "N/A",
     manutencao: i.manutencao ? "Sim" : "Não",
     atualizadoPor: i.updateUserName || "N/A",
   }));

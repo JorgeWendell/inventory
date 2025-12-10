@@ -56,6 +56,7 @@ export const upsertImpressora = actionClient
           marca: parsedInput.marca || null,
           modelo: parsedInput.modelo || null,
           localidadeNome: parsedInput.localidadeNome || null,
+          usuarioNome: parsedInput.usuarioNome || null,
           manutencao: parsedInput.manutencao,
           updateUserId: session.user.id,
           updatedAt: new Date(),
@@ -74,6 +75,7 @@ export const upsertImpressora = actionClient
             modelo: impressoraExistente[0].modelo,
             manutencao: impressoraExistente[0].manutencao,
             localidadeNome: impressoraExistente[0].localidadeNome,
+            usuarioNome: impressoraExistente[0].usuarioNome,
           },
           dadosNovos: {
             nome: parsedInput.nome,
@@ -81,6 +83,7 @@ export const upsertImpressora = actionClient
             modelo: parsedInput.modelo,
             manutencao: parsedInput.manutencao,
             localidadeNome: parsedInput.localidadeNome,
+            usuarioNome: parsedInput.usuarioNome,
           },
           updateUserId: session.user.id,
         });
@@ -118,6 +121,7 @@ export const upsertImpressora = actionClient
         marca: parsedInput.marca || null,
         modelo: parsedInput.modelo || null,
         localidadeNome: parsedInput.localidadeNome || null,
+        usuarioNome: parsedInput.usuarioNome || null,
         manutencao: parsedInput.manutencao,
         updateUserId: session.user.id,
         createdAt: new Date(),
@@ -135,6 +139,7 @@ export const upsertImpressora = actionClient
           modelo: parsedInput.modelo,
           manutencao: parsedInput.manutencao,
           localidadeNome: parsedInput.localidadeNome,
+          usuarioNome: parsedInput.usuarioNome,
         },
         updateUserId: session.user.id,
       });

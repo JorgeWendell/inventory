@@ -57,7 +57,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:3000",
     "http://inventory.adelbr.tech:9000",
-    "http://192.168.15.12:3000",
+    "http://192.168.15.12:9000",
   ],
   baseURL:
     process.env.NODE_ENV === "production"

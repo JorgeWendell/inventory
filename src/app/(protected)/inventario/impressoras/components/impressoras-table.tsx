@@ -24,6 +24,7 @@ interface ImpressoraTableData {
   marca: string;
   modelo: string;
   localidadeNome: string;
+  usuarioNome: string;
   manutencao: string;
   editadoPor: string;
 }
@@ -60,7 +61,8 @@ const ImpressorasTable = ({ refreshKey, searchTerm = "" }: ImpressorasTableProps
         impressora.nome.toLowerCase().includes(searchLower) ||
         impressora.marca.toLowerCase().includes(searchLower) ||
         impressora.modelo.toLowerCase().includes(searchLower) ||
-        impressora.localidadeNome.toLowerCase().includes(searchLower)
+        impressora.localidadeNome.toLowerCase().includes(searchLower) ||
+        impressora.usuarioNome.toLowerCase().includes(searchLower)
     );
   }, [impressoras, searchTerm]);
 
@@ -106,6 +108,7 @@ const ImpressorasTable = ({ refreshKey, searchTerm = "" }: ImpressorasTableProps
             <TableHead>Marca</TableHead>
             <TableHead>Modelo</TableHead>
             <TableHead>Localidade</TableHead>
+            <TableHead>Usuário</TableHead>
             <TableHead>Manutenção</TableHead>
             <TableHead>Editado por</TableHead>
             <TableHead className="text-right">Ações</TableHead>
@@ -114,7 +117,7 @@ const ImpressorasTable = ({ refreshKey, searchTerm = "" }: ImpressorasTableProps
         <TableBody>
           {filteredImpressoras.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 Nenhuma impressora encontrada.
               </TableCell>
             </TableRow>
@@ -126,6 +129,7 @@ const ImpressorasTable = ({ refreshKey, searchTerm = "" }: ImpressorasTableProps
                   <TableCell>{firstResult.marca}</TableCell>
                   <TableCell>{firstResult.modelo}</TableCell>
                   <TableCell>{firstResult.localidadeNome}</TableCell>
+                  <TableCell>{firstResult.usuarioNome}</TableCell>
                   <TableCell>{firstResult.manutencao}</TableCell>
                   <TableCell>{firstResult.editadoPor}</TableCell>
                   <TableCell className="text-right">

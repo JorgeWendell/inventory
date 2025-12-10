@@ -12,6 +12,7 @@ export async function getImpressorasTable() {
       marca: impressoraTable.marca,
       modelo: impressoraTable.modelo,
       localidadeNome: impressoraTable.localidadeNome,
+      usuarioNome: impressoraTable.usuarioNome,
       manutencao: impressoraTable.manutencao,
       updateUserEmail: usersTable.email,
     })
@@ -25,6 +26,7 @@ export async function getImpressorasTable() {
     marca: impressora.marca || "-",
     modelo: impressora.modelo || "-",
     localidadeNome: impressora.localidadeNome || "-",
+    usuarioNome: impressora.usuarioNome || "-",
     manutencao: impressora.manutencao ? "Sim" : "Não",
     editadoPor: impressora.updateUserEmail || "-",
   }));

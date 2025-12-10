@@ -11,6 +11,7 @@ interface ImpressorasTableRowProps {
     marca: string;
     modelo: string;
     localidadeNome: string;
+    usuarioNome: string;
     manutencao: string;
     editadoPor: string;
   };
@@ -29,6 +30,7 @@ const ImpressorasTableRow = ({
       <TableCell>{impressora.marca}</TableCell>
       <TableCell>{impressora.modelo}</TableCell>
       <TableCell>{impressora.localidadeNome}</TableCell>
+      <TableCell>{impressora.usuarioNome}</TableCell>
       <TableCell>{impressora.manutencao}</TableCell>
       <TableCell>{impressora.editadoPor}</TableCell>
       <TableCell className="text-right">

@@ -6,6 +6,7 @@ export const upsertImpressoraSchema = z.object({
   marca: z.string().optional(),
   modelo: z.string().optional(),
   localidadeNome: z.string().optional(),
+  usuarioNome: z.string().optional(),
   manutencao: z.boolean().default(false),
   toners: z
     .array(

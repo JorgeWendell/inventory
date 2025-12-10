@@ -185,6 +185,7 @@ export const impressoraTable = pgTable("impressora", {
   localidadeNome: text("localidade_nome").references(
     () => localidadeTable.nome,
   ),
+  usuarioNome: text("usuario_nome").references(() => usuarioTable.nome),
   manutencao: boolean("manutencao").default(false),
   updateUserId: text("update_user_id").references(() => usersTable.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -402,6 +403,7 @@ export const usuarioRelations = relations(usuarioTable, ({ one, many }) => ({
   computadores: many(computadoresTable),
   monitores: many(monitorTable),
   nobreaks: many(nobreakTable),
+  impressoras: many(impressoraTable),
   office: many(officeTable),
   cameras: many(camerasUsuariosTable),
   acessosDepartamentos: many(acessosDepartamentosTable),
@@ -442,6 +444,10 @@ export const impressoraRelations = relations(
     localidade: one(localidadeTable, {
       fields: [impressoraTable.localidadeNome],
       references: [localidadeTable.nome],
+    }),
+    usuario: one(usuarioTable, {
+      fields: [impressoraTable.usuarioNome],
+      references: [usuarioTable.nome],
     }),
     toners: many(impressorasTonersTable),
   }),
